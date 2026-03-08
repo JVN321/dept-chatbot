@@ -465,9 +465,9 @@ class DepartmentBrain:
             [f"[{i+1}] {item['text']}" for i, item in enumerate(contexts)]
         )
         system_prompt = (
-            "You are a department assistant. Answer ONLY from provided context. "
-            "Do not guess or add details not present in the context. "
-            f"If answer is not in context, say: {self._UNKNOWN_MESSAGE} "
+            "You are a department assistant."
+            #"Do not guess or add details not present in the context. "
+            #f"If answer is not in context, say: {self._UNKNOWN_MESSAGE} "
             "Keep answer brief, factual, and polite."
         )
         user_prompt = f"Context:\n{context_block}\n\nQuestion: {question}"
@@ -486,9 +486,10 @@ class DepartmentBrain:
         return completion.choices[0].message.content or self._UNKNOWN_MESSAGE
 
     def _gemini_generate(self, system_prompt: str, user_prompt: str) -> str:
+        
         if not self._gemini_key:
             return self._UNKNOWN_MESSAGE
-
+        
         url = (
             f"https://generativelanguage.googleapis.com/v1beta/models/{settings.llm_model}:generateContent"
             f"?key={self._gemini_key}"
@@ -541,8 +542,9 @@ class DepartmentBrain:
             return structured_answer, "structured", structured_sources
 
         rag_context = self.retrieve(question)
-        if not rag_context or not self._has_relevant_context(rag_context):
-            return self._UNKNOWN_MESSAGE, "rag", rag_context
+        
+        # if not rag_context or not self._has_relevant_context(rag_context):
+        #     return self._UNKNOWN_MESSAGE, "rag", rag_context
 
         answer = self.generate_grounded_answer(question, rag_context)
         return answer, "rag", rag_context
